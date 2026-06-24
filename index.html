@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Pallet Scanner</title>
+    <script src="https://auwdbwrtiwtzcnlmjcik.supabase.co/storage/v1/object/public/barcode/dbr.bundle.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+        background: #0f1117;
+        color: #e8eaf0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px 60px;
+      }
+
+      .header {
+        width: 100%;
+        max-width: 520px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .header h1 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #f0f2f8;
+        letter-spacing: -0.3px;
+      }
+      .header p {
+        font-size: 13px;
+        color: #7b8194;
+        margin-top: 4px;
+      }
+
+      #session-bar {
+        width: 100%;
+        max-width: 520px;
+        background: #181c28;
+        border: 1px solid #252a3d;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        display: none;
+      }
+      #session-bar.visible {
+        display: block;
+      }
+      .session-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .session-item {
+        flex: 1;
+        min-width: 0;
+      }
+      .session-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #5a6180;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 3px;
+      }
+      .session-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e8eaf0;
+        word-break: break-all;
+      }
+      .session-divider {
+        width: 1px;
+        height: 36px;
+        background: #252a3d;
+        flex-shrink: 0;
+      }
+      .lock-icon {
+        font-size: 11px;
+        margin-left: 4px;
+        opacity: 0.6;
+      }
+
+      #manual-section {
+        width: 100%;
+        max-width: 520px;
+        background: #181c28;
+        border: 1px solid #3a2a1a;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        display: none;
+      }
+      #manual-section.visible {
+        display: block;
+      }
+      .manual-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #ef9a4e;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 12px;
+      }
+      .manual-row {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+      }
+      .manual-field {
+        flex: 1;
+      }
+      .manual-field label {
+        font-size: 11px;
+        color: #7b8194;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .manual-field input {
+        width: 100%;
+        background: #0f1117;
+        border: 1px solid #2a2f48;
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: #e8eaf0;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+      }
+      .manual-field input:focus {
+        border-color: #4e6cef;
+      }
+      .manual-field input.locked {
+        opacity: 0.5;
+        background: #0a0c14;
+        cursor: not-allowed;
+      }
+      .btn-manual {
+        padding: 10px 16px;
+        background: #4e6cef;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        height: 40px;
+        align-self: flex-end;
+      }
+
+      #qty-section {
+        width: 100%;
+        max-width: 520px;
+        background: #181c28;
+        border: 1px solid #252a3d;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        display: none;
+      }
+      #qty-section.visible {
+        display: block;
+      }
+      .qty-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .qty-label {
+        font-size: 13px;
+        color: #9aa0b8;
+        flex: 1;
+      }
+      .qty-input {
+        width: 80px;
+        background: #0f1117;
+        border: 1px solid #2a2f48;
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: #e8eaf0;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: inherit;
+        text-align: center;
+        outline: none;
+      }
+      .qty-input:focus {
+        border-color: #4e6cef;
+      }
+      .btn-apply-qty {
+        padding: 10px 14px;
+        background: #1e2235;
+        color: #9aa0b8;
+        border: 1px solid #2a2f48;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      #drop-zone {
+        width: 100%;
+        max-width: 520px;
+        aspect-ratio: 4/3;
+        border: 2px dashed #2e3348;
+        border-radius: 16px;
+        background: #181c28;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+      }
+      #drop-zone img#preview {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: none;
+        position: absolute;
+        inset: 0;
+      }
+      .drop-icon {
+        font-size: 40px;
+        line-height: 1;
+      }
+      .drop-label {
+        font-size: 14px;
+        color: #5a6180;
+        text-align: center;
+        padding: 0 16px;
+      }
+      #drop-zone-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 17, 23, 0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        flex-direction: column;
+        gap: 12px;
+      }
+      #drop-zone-overlay.visible {
+        display: flex;
+      }
+      #spinner-label {
+        color: #9aa0b8;
+        font-size: 13px;
+        text-align: center;
+        padding: 0 20px;
+      }
+      #bbox-canvas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: none;
+      }
+
+      .btn-row {
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .btn {
+        flex: 1;
+        padding: 14px 10px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          opacity 0.15s,
+          transform 0.1s;
+        letter-spacing: 0.1px;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn-primary {
+        background: #4e6cef;
+        color: #fff;
+      }
+      .btn-secondary {
+        background: #1e2235;
+        color: #9aa0b8;
+        border: 1px solid #2a2f48;
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      #status {
+        margin-top: 14px;
+        font-size: 13px;
+        color: #7b8194;
+        min-height: 18px;
+        text-align: center;
+        padding: 0 8px;
+        line-height: 1.5;
+      }
+      #status.error {
+        color: #ef5a5a;
+      }
+      #status.success {
+        color: #4ecf8e;
+      }
+      #status.warning {
+        color: #ef9a4e;
+      }
+
+      #boxlist-section {
+        width: 100%;
+        max-width: 520px;
+        margin-top: 20px;
+        display: none;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #7b8194;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .badge {
+        background: #4e6cef22;
+        color: #7a9af5;
+        border: 1px solid #4e6cef44;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .box-card {
+        background: #181c28;
+        border: 1px solid #252a3d;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .box-card.new-item {
+        border-color: #4e6cef44;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .box-index {
+        min-width: 26px;
+        height: 26px;
+        background: #4e6cef22;
+        color: #7a9af5;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .box-value {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+        color: #e8eaf0;
+        min-width: 0;
+        word-break: break-all;
+      }
+      .box-qty-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .box-qty-label {
+        font-size: 11px;
+        color: #5a6180;
+      }
+      .box-qty-input {
+        width: 56px;
+        background: #0f1117;
+        border: 1px solid #2a2f48;
+        border-radius: 8px;
+        padding: 6px 8px;
+        color: #e8eaf0;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: inherit;
+        text-align: center;
+        outline: none;
+      }
+      .box-qty-input:focus {
+        border-color: #4e6cef;
+      }
+
+      #send-btn {
+        width: 100%;
+        max-width: 520px;
+        margin-top: 16px;
+        padding: 16px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #4e6cef, #6a4ecf);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: none;
+        letter-spacing: 0.2px;
+      }
+      #send-btn:active {
+        transform: scale(0.99);
+      }
+
+      #reset-btn {
+        width: 100%;
+        max-width: 520px;
+        margin-top: 10px;
+        padding: 13px;
+        border: 1px solid #3a2a2a;
+        border-radius: 14px;
+        background: transparent;
+        color: #ef5a5a;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: none;
+      }
+
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #2a2f48;
+        border-top-color: #4e6cef;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 20px;
+      }
+      #modal-overlay.visible {
+        display: flex;
+      }
+      .modal {
+        background: #181c28;
+        border: 1px solid #2a2f48;
+        border-radius: 18px;
+        padding: 24px;
+        max-width: 400px;
+        width: 100%;
+      }
+      .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #ef9a4e;
+        margin-bottom: 10px;
+      }
+      .modal-body {
+        font-size: 14px;
+        color: #9aa0b8;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .modal-body strong {
+        color: #e8eaf0;
+      }
+      .modal-buttons {
+        display: flex;
+        gap: 10px;
+      }
+      .modal-btn {
+        flex: 1;
+        padding: 13px;
+        border: none;
+        border-radius: 12px;
+        background: #4e6cef;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .modal-btn-cancel {
+        flex: 1;
+        padding: 13px;
+        border: 1px solid #2a2f48;
+        border-radius: 12px;
+        background: transparent;
+        color: #9aa0b8;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      /* Auth error screen */
+      #auth-error {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+        padding: 20px;
+      }
+      #auth-error.visible {
+        display: flex;
+      }
+      #auth-error .err-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      #auth-error h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ef5a5a;
+        margin-bottom: 8px;
+      }
+      #auth-error p {
+        font-size: 14px;
+        color: #5a6180;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Auth error (shown if no key in URL) -->
+    <div id="auth-error">
+      <div class="err-icon">🔒</div>
+      <h2>Access Denied</h2>
+      <p>
+        This scanner must be opened from within FileMaker.<br />Direct access is
+        not permitted.
+      </p>
+    </div>
+
+    <!-- Main app (hidden until auth passes) -->
+    <div
+      id="app"
+      style="
+        display: none;
+        width: 100%;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+      "
+    >
+      <div class="header">
+        <h1>Pallet Scanner</h1>
+        <p>Scan pallet labels to capture Box IDs</p>
+      </div>
+
+      <div id="session-bar">
+        <div class="session-row">
+          <div class="session-item">
+            <div class="session-label">
+              Part Number <span id="pn-lock" class="lock-icon"></span>
+            </div>
+            <div class="session-value" id="session-pn">—</div>
+          </div>
+          <div class="session-divider"></div>
+          <div class="session-item">
+            <div class="session-label">
+              Pallet ID <span id="pallet-lock" class="lock-icon"></span>
+            </div>
+            <div class="session-value" id="session-pallet">—</div>
+          </div>
+          <div class="session-divider"></div>
+          <div class="session-item">
+            <div class="session-label">Boxes</div>
+            <div class="session-value" id="session-count">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="manual-section">
+        <div class="manual-title">⚠ Missing from scan — enter manually</div>
+        <div class="manual-row">
+          <div class="manual-field" id="manual-pn-wrap">
+            <label>Part Number (first 5 chars)</label>
+            <input
+              type="text"
+              id="manual-pn"
+              placeholder="e.g. 25093"
+              maxlength="10"
+            />
+          </div>
+          <div class="manual-field" id="manual-pallet-wrap">
+            <label>Pallet ID</label>
+            <input type="text" id="manual-pallet" placeholder="e.g. 2624083" />
+          </div>
+          <button class="btn-manual" onclick="applyManualEntry()">Apply</button>
+        </div>
+      </div>
+
+      <div id="qty-section">
+        <div class="qty-row">
+          <span class="qty-label">Default quantity per Box ID</span>
+          <input
+            type="number"
+            class="qty-input"
+            id="default-qty"
+            value="4"
+            min="1"
+            max="999"
+          />
+          <button class="btn-apply-qty" onclick="applyDefaultQty()">
+            Apply to all
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="drop-zone"
+        onclick="document.getElementById('file-input').click()"
+      >
+        <span class="drop-icon">📷</span>
+        <span class="drop-label">Tap to photograph pallet label</span>
+        <img id="preview" alt="Scanned label" />
+        <canvas id="bbox-canvas"></canvas>
+        <div id="drop-zone-overlay">
+          <div class="spinner"></div>
+          <span id="spinner-label">Loading…</span>
+        </div>
+      </div>
+
+      <input
+        type="file"
+        id="file-input"
+        accept="image/*"
+        style="display: none"
+        onchange="handleFileSelect(this)"
+      />
+
+      <div class="btn-row">
+        <button
+          class="btn btn-primary"
+          onclick="document.getElementById('file-input').click()"
+        >
+          📁 Photo
+        </button>
+        <button
+          class="btn btn-secondary"
+          id="scan-btn"
+          onclick="runScan()"
+          disabled
+        >
+          🔍 Scan
+        </button>
+        <button
+          class="btn btn-secondary"
+          id="add-photo-btn"
+          onclick="addAnotherPhoto()"
+          style="display: none"
+        >
+          ➕ Add Photo
+        </button>
+      </div>
+
+      <div id="status">Ready — photograph a pallet label to begin</div>
+
+      <div id="boxlist-section">
+        <div class="section-header">
+          <span class="section-title">Box ID List</span>
+          <span class="badge" id="box-count-badge">0 boxes</span>
+        </div>
+        <div id="box-list"></div>
+      </div>
+
+      <button id="send-btn" onclick="sendToFileMaker()">
+        ✓ Send to FileMaker
+      </button>
+      <button id="reset-btn" onclick="confirmReset()">↺ Reset Session</button>
+    </div>
+    <!-- end #app -->
+
+    <div id="modal-overlay">
+      <div class="modal">
+        <div class="modal-title" id="modal-title">Notice</div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-buttons">
+          <button
+            class="modal-btn-cancel"
+            id="modal-cancel"
+            onclick="dismissModal()"
+            style="display: none"
+          >
+            Cancel
+          </button>
+          <button
+            class="modal-btn"
+            id="modal-confirm"
+            onclick="handleModalConfirm()"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ── AUTH: read license key from URL param ─────────────────────────
+      // FileMaker injects the key via the URL when opening the Web Viewer:
+      // "https://your-supabase-url/barcode_scanner_webviewer.html?key=" & Globals::g_DynamsoftKey
+      const params = new URLSearchParams(window.location.search);
+      const LICENSE_KEY = params.get('key') || '';
+
+      if (!LICENSE_KEY) {
+        document.getElementById('auth-error').classList.add('visible');
+      } else {
+        document.getElementById('app').style.display = 'flex';
+        document.getElementById('app').style.flexDirection = 'column';
+        document.getElementById('app').style.alignItems = 'center';
+        document.getElementById('app').style.width = '100%';
+        initDynamsoft();
+      }
+
+      // ── Dynamsoft v11 init ────────────────────────────────────────────
+      const SUPABASE_BASE =
+        'https://auwdbwrtiwtzcnlmjcik.supabase.co/storage/v1/object/public/barcode';
+
+      function initDynamsoft() {
+        Dynamsoft.License.LicenseManager.initLicense(LICENSE_KEY);
+        Dynamsoft.Core.CoreModule.engineResourcePaths = {
+          core: SUPABASE_BASE + '/',
+          dbr: SUPABASE_BASE + '/',
+          dce: SUPABASE_BASE + '/',
+          cvr: SUPABASE_BASE + '/',
+          std: SUPABASE_BASE + '/',
+          dip: SUPABASE_BASE + '/',
+        };
+      }
+
+      // ── Session state ─────────────────────────────────────────────────
+      let session = {
+        pn: null,
+        palletId: null,
+        pnLocked: false,
+        palletLocked: false,
+        boxIds: {},
+        photoCount: 0,
+      };
+
+      let cvRouter = null;
+      let currentFile = null;
+      let modalAction = null; // "reset" or null
+
+      // ── Router init ───────────────────────────────────────────────────
+      async function initRouter() {
+        if (cvRouter) return true;
+        try {
+          setSpinnerLabel('Loading scanner engine…');
+          await Dynamsoft.Core.CoreModule.loadWasm(['DBR']);
+          cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+          return true;
+        } catch (e) {
+          setStatus('Init error: ' + (e.message || String(e)), 'error');
+          cvRouter = null;
+          return false;
+        }
+      }
+
+      // ── Barcode classification ────────────────────────────────────────
+      function classifyBarcodes(items) {
+        const result = { pn: null, palletId: null, boxIds: [] };
+        const sorted = [...items].sort((a, b) => a.text.length - b.text.length);
+
+        for (const item of sorted) {
+          const val = item.text.trim();
+          if (!result.pn && val.includes('-')) {
+            result.pn = val.substring(0, 5);
+            continue;
+          }
+          if (!result.palletId && /^\d+$/.test(val) && val.length <= 10) {
+            result.palletId = val;
+            continue;
+          }
+          if (/^\d{10,}$/.test(val)) {
+            result.boxIds.push(val);
+          }
+        }
+        return result;
+      }
+
+      // ── File selection ────────────────────────────────────────────────
+      function handleFileSelect(input) {
+        if (!input.files || !input.files[0]) return;
+        currentFile = input.files[0];
+        const url = URL.createObjectURL(currentFile);
+        const img = document.getElementById('preview');
+        img.onload = () => {
+          img.style.display = 'block';
+          document.querySelector('.drop-icon').style.display = 'none';
+          document.querySelector('.drop-label').style.display = 'none';
+          hideBBoxes();
+          document.getElementById('scan-btn').disabled = false;
+          setStatus('Image loaded — tap Scan');
+        };
+        img.onerror = () => setStatus('Image failed to render.', 'error');
+        img.src = url;
+      }
+
+      // ── Run scan ──────────────────────────────────────────────────────
+      async function runScan() {
+        if (!currentFile) {
+          setStatus('No image selected.', 'error');
+          return;
+        }
+        showSpinner(true);
+        setSpinnerLabel('Initializing…');
+        setStatus('Starting scan…');
+        document.getElementById('scan-btn').disabled = true;
+
+        try {
+          const ready = await initRouter();
+          if (!ready) return;
+          setSpinnerLabel('Scanning…');
+          const result = await cvRouter.capture(
+            currentFile,
+            'ReadBarcodes_ReadRateFirst',
+          );
+          const items = (result.items || []).filter(
+            (i) =>
+              i.type === Dynamsoft.Core.EnumCapturedResultItemType.CRIT_BARCODE,
+          );
+          if (!items.length) {
+            setStatus('No barcodes detected. Try a clearer photo.', 'error');
+            return;
+          }
+          drawBoundingBoxes(items);
+          processResults(items);
+        } catch (e) {
+          setStatus('Scan error: ' + (e.message || String(e)), 'error');
+        } finally {
+          showSpinner(false);
+          document.getElementById('scan-btn').disabled = false;
+        }
+      }
+
+      // ── Process results ───────────────────────────────────────────────
+      function processResults(items) {
+        const classified = classifyBarcodes(items);
+        const defaultQty =
+          parseInt(document.getElementById('default-qty').value) || 1;
+        let newBoxCount = 0;
+        let blocked = false;
+
+        if (classified.pn) {
+          if (!session.pn) {
+            session.pn = classified.pn;
+          } else if (!session.pnLocked && classified.pn !== session.pn) {
+            showModal(
+              'Part Number Mismatch',
+              'This photo contains Part Number <strong>' +
+                classified.pn +
+                '</strong> but the current session has <strong>' +
+                session.pn +
+                '</strong>.<br><br>Photo rejected. Reset the session to start over.',
+            );
+            blocked = true;
+          }
+        }
+
+        if (!blocked && classified.palletId) {
+          if (!session.palletId) {
+            session.palletId = classified.palletId;
+          } else if (
+            !session.palletLocked &&
+            classified.palletId !== session.palletId
+          ) {
+            showModal(
+              'Pallet ID Mismatch',
+              'This photo contains Pallet ID <strong>' +
+                classified.palletId +
+                '</strong> but the current session has <strong>' +
+                session.palletId +
+                '</strong>.<br><br>Photo rejected. Reset the session to start over.',
+            );
+            blocked = true;
+          }
+        }
+
+        if (blocked) return;
+
+        const hasPN = !!session.pn;
+        const hasPallet = !!session.palletId;
+
+        if (!hasPN || !hasPallet) {
+          showManualSection(!hasPN, !hasPallet);
+          setStatus(
+            '⚠ ' +
+              (!hasPN ? 'Part Number' : '') +
+              (!hasPN && !hasPallet ? ' and ' : '') +
+              (!hasPallet ? 'Pallet ID' : '') +
+              ' not detected — enter manually to continue.',
+            'warning',
+          );
+        }
+
+        for (const boxId of classified.boxIds) {
+          if (!session.boxIds[boxId]) {
+            session.boxIds[boxId] = { qty: defaultQty };
+            newBoxCount++;
+          }
+        }
+
+        session.photoCount++;
+        updateSessionBar();
+        renderBoxList();
+
+        if (hasPN && hasPallet) {
+          hideManualSection();
+          const total = Object.keys(session.boxIds).length;
+          if (newBoxCount > 0) {
+            setStatus(
+              '+' +
+                newBoxCount +
+                ' new Box ID' +
+                (newBoxCount > 1 ? 's' : '') +
+                ' added. ' +
+                total +
+                ' total.',
+              'success',
+            );
+          } else {
+            setStatus('No new Box IDs found. ' + total + ' total.', 'warning');
+          }
+        }
+
+        document.getElementById('add-photo-btn').style.display = 'block';
+
+        if (hasPN && hasPallet && Object.keys(session.boxIds).length > 0) {
+          document.getElementById('send-btn').style.display = 'block';
+          document.getElementById('reset-btn').style.display = 'block';
+          document.getElementById('qty-section').classList.add('visible');
+        }
+      }
+
+      // ── Manual entry ──────────────────────────────────────────────────
+      function applyManualEntry() {
+        const pnInput = document.getElementById('manual-pn');
+        const palletInput = document.getElementById('manual-pallet');
+        const pnVal = pnInput.value.trim().substring(0, 5);
+        const palletVal = palletInput.value.trim();
+        const needPN = !session.pn;
+        const needPallet = !session.palletId;
+
+        if (needPN && !pnVal) {
+          setStatus('Please enter a Part Number.', 'error');
+          return;
+        }
+        if (needPallet && !palletVal) {
+          setStatus('Please enter a Pallet ID.', 'error');
+          return;
+        }
+
+        if (needPN) {
+          session.pn = pnVal;
+          session.pnLocked = true;
+          pnInput.classList.add('locked');
+          pnInput.disabled = true;
+          document.getElementById('pn-lock').textContent = '🔒';
+        }
+        if (needPallet) {
+          session.palletId = palletVal;
+          session.palletLocked = true;
+          palletInput.classList.add('locked');
+          palletInput.disabled = true;
+          document.getElementById('pallet-lock').textContent = '🔒';
+        }
+
+        hideManualSection();
+        updateSessionBar();
+
+        const total = Object.keys(session.boxIds).length;
+        if (total > 0) {
+          document.getElementById('send-btn').style.display = 'block';
+          document.getElementById('reset-btn').style.display = 'block';
+          document.getElementById('qty-section').classList.add('visible');
+          renderBoxList();
+          setStatus(
+            'Session values set. ' +
+              total +
+              ' Box ID' +
+              (total > 1 ? 's' : '') +
+              ' ready.',
+            'success',
+          );
+        } else {
+          setStatus(
+            'Session values set. Scan a label to capture Box IDs.',
+            'success',
+          );
+        }
+      }
+
+      // ── Default qty ───────────────────────────────────────────────────
+      function applyDefaultQty() {
+        const qty = parseInt(document.getElementById('default-qty').value) || 1;
+        for (const id in session.boxIds) session.boxIds[id].qty = qty;
+        document.querySelectorAll('.box-qty-input').forEach((i) => {
+          i.value = qty;
+        });
+        setStatus(
+          'Default quantity ' + qty + ' applied to all boxes.',
+          'success',
+        );
+      }
+
+      // ── Add another photo ─────────────────────────────────────────────
+      function addAnotherPhoto() {
+        currentFile = null;
+        const img = document.getElementById('preview');
+        img.style.display = 'none';
+        img.src = '';
+        document.querySelector('.drop-icon').style.display = '';
+        document.querySelector('.drop-label').style.display = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('scan-btn').disabled = true;
+        hideBBoxes();
+        setStatus('Ready — add another photo');
+        document.getElementById('add-photo-btn').style.display = 'none';
+      }
+
+      // ── Render box list ───────────────────────────────────────────────
+      function renderBoxList() {
+        const section = document.getElementById('boxlist-section');
+        const list = document.getElementById('box-list');
+        const badge = document.getElementById('box-count-badge');
+        const ids = Object.keys(session.boxIds);
+
+        if (!ids.length) {
+          section.style.display = 'none';
+          return;
+        }
+        section.style.display = 'block';
+        badge.textContent =
+          ids.length + ' box' + (ids.length !== 1 ? 'es' : '');
+
+        const existing = new Set(
+          Array.from(list.querySelectorAll('.box-card')).map(
+            (c) => c.dataset.id,
+          ),
+        );
+
+        ids.forEach((id, i) => {
+          if (existing.has(id)) return;
+          const card = document.createElement('div');
+          card.className = 'box-card new-item';
+          card.dataset.id = id;
+          card.innerHTML =
+            '<div class="box-index">' +
+            (i + 1) +
+            '</div>' +
+            '<div class="box-value">' +
+            escHtml(id) +
+            '</div>' +
+            '<div class="box-qty-wrap">' +
+            '<span class="box-qty-label">Qty</span>' +
+            '<input class="box-qty-input" type="number" min="1" max="999" value="' +
+            session.boxIds[id].qty +
+            '" onchange="updateQty(\'' +
+            id +
+            '\', this.value)" />' +
+            '</div>';
+          list.appendChild(card);
+          setTimeout(() => card.classList.remove('new-item'), 400);
+        });
+      }
+
+      function updateQty(boxId, val) {
+        if (session.boxIds[boxId])
+          session.boxIds[boxId].qty = parseInt(val) || 1;
+      }
+
+      // ── Session bar ───────────────────────────────────────────────────
+      function updateSessionBar() {
+        document.getElementById('session-pn').textContent = session.pn || '—';
+        document.getElementById('session-pallet').textContent =
+          session.palletId || '—';
+        document.getElementById('session-count').textContent = Object.keys(
+          session.boxIds,
+        ).length;
+        document.getElementById('session-bar').classList.add('visible');
+      }
+
+      function showManualSection(showPN, showPallet) {
+        document.getElementById('manual-section').classList.add('visible');
+        document.getElementById('manual-pn-wrap').style.display = showPN
+          ? ''
+          : 'none';
+        document.getElementById('manual-pallet-wrap').style.display = showPallet
+          ? ''
+          : 'none';
+      }
+      function hideManualSection() {
+        document.getElementById('manual-section').classList.remove('visible');
+      }
+
+      // ── Bounding boxes ────────────────────────────────────────────────
+      function drawBoundingBoxes(items) {
+        const img = document.getElementById('preview');
+        const canvas = document.getElementById('bbox-canvas');
+        if (!items.length || !img.naturalWidth) return;
+        canvas.style.display = 'block';
+        canvas.width = img.offsetWidth;
+        canvas.height = img.offsetHeight;
+        const scaleX = img.offsetWidth / img.naturalWidth;
+        const scaleY = img.offsetHeight / img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const colors = ['#4e6cef', '#4ecf8e', '#ef9a4e', '#ef5a9a', '#c04eef'];
+        items.forEach((item, i) => {
+          const pts = item.location && item.location.points;
+          if (!pts || pts.length < 4) return;
+          ctx.strokeStyle = colors[i % colors.length];
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = colors[i % colors.length];
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x * scaleX, pts[0].y * scaleY);
+          for (let j = 1; j < pts.length; j++)
+            ctx.lineTo(pts[j].x * scaleX, pts[j].y * scaleY);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.font = 'bold 13px -apple-system, sans-serif';
+          ctx.fillText(
+            String(i + 1),
+            pts[0].x * scaleX + 4,
+            pts[0].y * scaleY - 6,
+          );
+        });
+      }
+      function hideBBoxes() {
+        const canvas = document.getElementById('bbox-canvas');
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+      }
+
+      // ── Send to FileMaker ─────────────────────────────────────────────
+      function sendToFileMaker() {
+        if (!session.pn || !session.palletId) {
+          setStatus(
+            'Part Number and Pallet ID required before sending.',
+            'error',
+          );
+          return;
+        }
+        if (!Object.keys(session.boxIds).length) {
+          setStatus('No Box IDs to send.', 'error');
+          return;
+        }
+        const boxes = Object.entries(session.boxIds).map(([id, data], i) => ({
+          index: i + 1,
+          boxId: id,
+          qty: data.qty,
+        }));
+        const payload = {
+          partNumber: session.pn,
+          palletId: session.palletId,
+          totalBoxes: boxes.length,
+          totalQty: boxes.reduce((sum, b) => sum + b.qty, 0),
+          boxes: boxes,
+        };
+        const jsonString = JSON.stringify(payload);
+
+        if (typeof FileMaker !== 'undefined') {
+          FileMaker.PerformScript('Process Barcode Results', jsonString);
+        } else if (typeof fmwebviewjs !== 'undefined') {
+          fmwebviewjs.PerformScript('Process Barcode Results', jsonString);
+        } else {
+          setStatus('FileMaker bridge not available.', 'error');
+          return;
+        }
+        setStatus('Sent to FileMaker — ' + boxes.length + ' boxes.', 'success');
+      }
+
+      // ── Reset ─────────────────────────────────────────────────────────
+      function confirmReset() {
+        showModal(
+          'Reset Session?',
+          'This will clear all scanned Box IDs, Part Number, and Pallet ID. This cannot be undone.',
+          'reset',
+        );
+      }
+
+      function doReset() {
+        session = {
+          pn: null,
+          palletId: null,
+          pnLocked: false,
+          palletLocked: false,
+          boxIds: {},
+          photoCount: 0,
+        };
+        currentFile = null;
+        const img = document.getElementById('preview');
+        img.style.display = 'none';
+        img.src = '';
+        document.querySelector('.drop-icon').style.display = '';
+        document.querySelector('.drop-label').style.display = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('scan-btn').disabled = true;
+        document.getElementById('add-photo-btn').style.display = 'none';
+        document.getElementById('send-btn').style.display = 'none';
+        document.getElementById('reset-btn').style.display = 'none';
+        document.getElementById('box-list').innerHTML = '';
+        document.getElementById('boxlist-section').style.display = 'none';
+        document.getElementById('session-bar').classList.remove('visible');
+        document.getElementById('qty-section').classList.remove('visible');
+        const pnInput = document.getElementById('manual-pn');
+        const palletInput = document.getElementById('manual-pallet');
+        pnInput.value = '';
+        palletInput.value = '';
+        pnInput.disabled = false;
+        palletInput.disabled = false;
+        pnInput.classList.remove('locked');
+        palletInput.classList.remove('locked');
+        document.getElementById('pn-lock').textContent = '';
+        document.getElementById('pallet-lock').textContent = '';
+        hideManualSection();
+        hideBBoxes();
+        setStatus('Session reset — ready to scan');
+      }
+
+      // ── Modal ─────────────────────────────────────────────────────────
+      function showModal(title, body, action) {
+        modalAction = action || null;
+        document.getElementById('modal-title').innerHTML = title;
+        document.getElementById('modal-body').innerHTML = body;
+        const confirmBtn = document.getElementById('modal-confirm');
+        const cancelBtn = document.getElementById('modal-cancel');
+        if (action === 'reset') {
+          confirmBtn.textContent = 'Yes, Reset';
+          confirmBtn.style.background = '#ef5a5a';
+          cancelBtn.style.display = 'block';
+        } else {
+          confirmBtn.textContent = 'OK';
+          confirmBtn.style.background = '#4e6cef';
+          cancelBtn.style.display = 'none';
+        }
+        document.getElementById('modal-overlay').classList.add('visible');
+      }
+      function handleModalConfirm() {
+        document.getElementById('modal-overlay').classList.remove('visible');
+        if (modalAction === 'reset') doReset();
+        modalAction = null;
+      }
+      function dismissModal() {
+        document.getElementById('modal-overlay').classList.remove('visible');
+        modalAction = null;
+      }
+
+      // ── Helpers ───────────────────────────────────────────────────────
+      function setStatus(msg, type) {
+        const el = document.getElementById('status');
+        el.textContent = msg;
+        el.className = type || '';
+      }
+      function setSpinnerLabel(msg) {
+        document.getElementById('spinner-label').textContent = msg;
+      }
+      function showSpinner(show) {
+        document
+          .getElementById('drop-zone-overlay')
+          .classList.toggle('visible', show);
+      }
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+    </script>
+  </body>
+</html>
