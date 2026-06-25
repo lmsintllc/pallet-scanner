@@ -285,9 +285,9 @@
       <button class="btn btn-secondary" id="scan-btn" onclick="runScan()" disabled>
         🔍 Scan
       </button>
-      <button class="btn btn-secondary" id="add-photo-btn" onclick="addAnotherPhoto()" style="display:none">
-        ➕ Add Photo
-      </button>
+      <button class="btn btn-secondary" id="add-photo-btn" onclick="triggerFileMakerPhoto()" style="display:none">
+  ➕ Add Photo
+</button>
     </div>
 
     <div id="status">Ready — use the Take Photo button to begin</div>
@@ -793,6 +793,14 @@
         .replace(/&/g,"&amp;").replace(/</g,"&lt;")
         .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
+    function triggerFileMakerPhoto() {
+  addAnotherPhoto(); // reset preview
+  if (typeof FileMaker !== "undefined") {
+    FileMaker.PerformScript("Take Photo", "");
+  } else if (typeof fmwebviewjs !== "undefined") {
+    fmwebviewjs.PerformScript("Take Photo", "");
+  }
+}
   </script>
 </body>
 </html>
