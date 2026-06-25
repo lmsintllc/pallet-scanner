@@ -224,7 +224,7 @@
 
     <div class="header">
       <h1>Pallet Scanner</h1>
-      <p>Use the Photo button in FileMaker to scan a label</p>
+      <p>Tap Take Photo to scan a pallet label</p>
     </div>
 
     <div id="session-bar">
@@ -272,7 +272,7 @@
     <!-- Preview zone — image injected by FileMaker via receiveBase64Image() -->
     <div id="preview-zone">
       <span class="preview-icon">📷</span>
-      <span class="preview-label">Tap "Take Photo" in FileMaker to scan a label</span>
+      <span class="preview-label">Tap Take Photo to photograph a pallet label</span>
       <img id="preview" alt="Scanned label" />
       <canvas id="bbox-canvas"></canvas>
       <div id="drop-zone-overlay">
@@ -282,15 +282,15 @@
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-primary" id="photo-btn" onclick="triggerFileMakerPhoto()">
+        📷 Take Photo
+      </button>
       <button class="btn btn-secondary" id="scan-btn" onclick="runScan()" disabled>
         🔍 Scan
       </button>
-      <button class="btn btn-secondary" id="add-photo-btn" onclick="triggerFileMakerPhoto()" style="display:none">
-        ➕ Add Photo
-      </button>
     </div>
 
-    <div id="status">Ready — use the Take Photo button to begin</div>
+    <div id="status">Ready — tap Take Photo to begin</div>
 
     <div id="boxlist-section">
       <div class="section-header">
@@ -524,7 +524,6 @@
         }
       }
 
-      document.getElementById("add-photo-btn").style.display = "block";
 
       if (hasPN && hasPallet && Object.keys(session.boxIds).length > 0) {
         document.getElementById("send-btn").style.display  = "block";
@@ -590,12 +589,20 @@
       document.getElementById("scan-btn").disabled = true;
       hideBBoxes();
       setStatus("Opening camera...");
-      document.getElementById("add-photo-btn").style.display = "none";
     }
 
-    // Resets preview AND triggers FileMaker camera directly - one tap
+    // Resets preview and triggers FileMaker camera - works for first photo and retakes
     function triggerFileMakerPhoto() {
-      addAnotherPhoto();
+      // Reset preview state
+      currentFile = null;
+      var img = document.getElementById("preview");
+      img.style.display = "none"; img.src = "";
+      document.querySelector(".preview-icon").style.display  = "";
+      document.querySelector(".preview-label").style.display = "";
+      document.getElementById("scan-btn").disabled = true;
+      hideBBoxes();
+      setStatus("Opening camera...");
+      // Fire FileMaker native camera
       if (typeof FileMaker !== "undefined") {
         FileMaker.PerformScript("Take Photo", "");
       } else if (typeof fmwebviewjs !== "undefined") {
@@ -740,7 +747,6 @@
       document.querySelector(".preview-icon").style.display  = "";
       document.querySelector(".preview-label").style.display = "";
       document.getElementById("scan-btn").disabled = true;
-      document.getElementById("add-photo-btn").style.display = "none";
       document.getElementById("send-btn").style.display      = "none";
       document.getElementById("reset-btn").style.display     = "none";
       document.getElementById("box-list").innerHTML = "";
