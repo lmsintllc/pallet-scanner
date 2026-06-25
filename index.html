@@ -670,8 +670,7 @@
         </div>
       </div>
 
-      <input type="file" id="file-input" accept="image/*" style="display:none" />
-
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileSelect(event)" />
       <div class="btn-row">
         <button
           class="btn btn-primary"
@@ -829,22 +828,24 @@
       }
 
       // ── File selection ────────────────────────────────────────────────
-      function handleFileSelect(input) {
-        if (!input.files || !input.files[0]) return;
-        currentFile = input.files[0];
-        const url = URL.createObjectURL(currentFile);
-        const img = document.getElementById('preview');
-        img.onload = () => {
-          img.style.display = 'block';
-          document.querySelector('.drop-icon').style.display = 'none';
-          document.querySelector('.drop-label').style.display = 'none';
-          hideBBoxes();
-          document.getElementById('scan-btn').disabled = false;
-          setStatus('Image loaded — tap Scan');
-        };
-        img.onerror = () => setStatus('Image failed to render.', 'error');
-        img.src = url;
-      }
+      function handleFileSelect(e) {
+  const input = e.target || e;
+  if (!input.files || !input.files[0]) return;
+  setStatus("Photo received — loading preview...", "");
+  currentFile = input.files[0];
+  const url = URL.createObjectURL(currentFile);
+  const img = document.getElementById('preview');
+  img.onload = () => {
+    img.style.display = 'block';
+    document.querySelector('.drop-icon').style.display = 'none';
+    document.querySelector('.drop-label').style.display = 'none';
+    hideBBoxes();
+    document.getElementById('scan-btn').disabled = false;
+    setStatus('Image loaded (' + img.naturalWidth + 'x' + img.naturalHeight + ') — tap Scan');
+  };
+  img.onerror = () => setStatus('Image failed to render.', 'error');
+  img.src = url;
+}
 
       // ── Run scan ──────────────────────────────────────────────────────
       async function runScan() {
@@ -1323,9 +1324,14 @@
           .replace(/"/g, '&quot;');
       }
 
-      document.getElementById("file-input").addEventListener("change", function() {
-  setStatus("File input changed — files: " + this.files.length, "");
-  handleFileSelect(this);
+      window.addEventListener("load", function() {
+  var fi = document.getElementById("file-input");
+  if (fi) {
+    fi.addEventListener("change", function(e) {
+      setStatus("File input fired...", "");
+      handleFileSelect(e);
+    });
+  }
 });
     </script>
   </body>
