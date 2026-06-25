@@ -793,11 +793,17 @@
 
       // ── Router init ───────────────────────────────────────────────────
       async function initRouter() {
-        if (cvRouter) return true;
+        if (cvRouter) {
+          setStatus('Router already initialized', '');
+          return true;
+        }
+
         try {
+          setStatus('Loading WASM...', '');
           setSpinnerLabel('Loading scanner engine…');
           await Dynamsoft.Core.CoreModule.loadWasm(['DBR']);
           cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+          setStatus('Router ready', 'success');
           return true;
         } catch (e) {
           setStatus('Init error: ' + (e.message || String(e)), 'error');
@@ -858,6 +864,8 @@
         document.getElementById('scan-btn').disabled = true;
 
         try {
+          setStatus('Tap received — starting...', '');
+
           const ready = await initRouter();
           if (!ready) return;
           setSpinnerLabel('Scanning…');
