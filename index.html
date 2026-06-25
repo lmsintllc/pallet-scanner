@@ -78,21 +78,20 @@
       font-size: 13px; font-weight: 600; cursor: pointer;
     }
 
-    /* Drop zone as label for direct file input association */
-    #drop-zone {
+    /* Preview zone — no tap needed, FileMaker sends image directly */
+    #preview-zone {
       width: 100%; max-width: 520px; aspect-ratio: 4/3;
       border: 2px dashed #2e3348; border-radius: 16px;
       background: #181c28; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 10px;
-      cursor: pointer; overflow: hidden; position: relative;
-      -webkit-tap-highlight-color: transparent;
+      overflow: hidden; position: relative;
     }
-    #drop-zone img#preview {
+    #preview-zone img#preview {
       width: 100%; height: 100%; object-fit: contain;
       display: none; position: absolute; inset: 0;
     }
-    .drop-icon  { font-size: 40px; line-height: 1; pointer-events: none; }
-    .drop-label { font-size: 14px; color: #5a6180; text-align: center; padding: 0 16px; pointer-events: none; }
+    .preview-icon  { font-size: 40px; line-height: 1; }
+    .preview-label { font-size: 14px; color: #5a6180; text-align: center; padding: 0 16px; }
     #drop-zone-overlay {
       position: absolute; inset: 0; background: rgba(15,17,23,0.75);
       display: none; align-items: center; justify-content: center;
@@ -103,21 +102,12 @@
     #spinner-label { color: #9aa0b8; font-size: 13px; text-align: center; padding: 0 20px; }
     #bbox-canvas { position: absolute; inset: 0; pointer-events: none; display: none; }
 
-    /* Hidden file input — positioned off screen but accessible */
-    #file-input {
-      position: absolute;
-      width: 1px; height: 1px;
-      opacity: 0; overflow: hidden;
-      pointer-events: none;
-    }
-
     .btn-row { width: 100%; max-width: 520px; display: flex; gap: 10px; margin-top: 14px; }
     .btn {
       flex: 1; padding: 14px 10px; border: none; border-radius: 12px;
       font-size: 14px; font-weight: 600; cursor: pointer;
       transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.1px;
-      text-align: center; text-decoration: none; display: flex;
-      align-items: center; justify-content: center;
+      text-align: center; display: flex; align-items: center; justify-content: center;
       -webkit-tap-highlight-color: transparent;
     }
     .btn:active { transform: scale(0.97); }
@@ -234,7 +224,7 @@
 
     <div class="header">
       <h1>Pallet Scanner</h1>
-      <p>Scan pallet labels to capture Box IDs</p>
+      <p>Use the Photo button in FileMaker to scan a label</p>
     </div>
 
     <div id="session-bar">
@@ -279,24 +269,19 @@
       </div>
     </div>
 
-    <!-- File input — hidden but accessible via label -->
-    <input type="file" id="file-input" accept="image/*" />
-
-    <!-- Drop zone as a label wrapping the file input trigger -->
-    <label id="drop-zone" for="file-input">
-      <span class="drop-icon">📷</span>
-      <span class="drop-label">Tap to photograph pallet label</span>
+    <!-- Preview zone — image injected by FileMaker via receiveBase64Image() -->
+    <div id="preview-zone">
+      <span class="preview-icon">📷</span>
+      <span class="preview-label">Tap "Take Photo" in FileMaker to scan a label</span>
       <img id="preview" alt="Scanned label" />
       <canvas id="bbox-canvas"></canvas>
       <div id="drop-zone-overlay">
         <div class="spinner"></div>
         <span id="spinner-label">Loading…</span>
       </div>
-    </label>
+    </div>
 
     <div class="btn-row">
-      <!-- Photo button as label for direct file input association -->
-      <label for="file-input" class="btn btn-primary">📁 Photo</label>
       <button class="btn btn-secondary" id="scan-btn" onclick="runScan()" disabled>
         🔍 Scan
       </button>
@@ -305,7 +290,7 @@
       </button>
     </div>
 
-    <div id="status">Ready — tap Photo to begin</div>
+    <div id="status">Ready — use the Take Photo button to begin</div>
 
     <div id="boxlist-section">
       <div class="section-header">
@@ -333,8 +318,8 @@
 
   <script>
     // ── AUTH ──────────────────────────────────────────────────────────
-    const params      = new URLSearchParams(window.location.search);
-    const LICENSE_KEY = params.get("key") || "";
+    var params      = new URLSearchParams(window.location.search);
+    var LICENSE_KEY = params.get("key") || "";
 
     if (!LICENSE_KEY) {
       document.getElementById("auth-error").classList.add("visible");
@@ -345,11 +330,10 @@
       appEl.style.alignItems    = "center";
       appEl.style.width         = "100%";
       initDynamsoft();
-      setupFileInput();
     }
 
     // ── Dynamsoft v11 ─────────────────────────────────────────────────
-    const SUPABASE_BASE = "https://auwdbwrtiwtzcnlmjcik.supabase.co/storage/v1/object/public/barcode";
+    var SUPABASE_BASE = "https://auwdbwrtiwtzcnlmjcik.supabase.co/storage/v1/object/public/barcode";
 
     function initDynamsoft() {
       Dynamsoft.License.LicenseManager.initLicense(LICENSE_KEY);
@@ -360,38 +344,7 @@
       };
     }
 
-    // ── File input setup ──────────────────────────────────────────────
-    // Using both onchange attribute AND addEventListener for maximum
-    // compatibility with FileMaker Go's WebKit
-    function setupFileInput() {
-      fi.addEventListener("change", function() {
-  setStatus("Photo received — reading...", "");
-  if (!this.files || !this.files[0]) {
-    setStatus("No file received.", "error");
-    return;
-  }
-  currentFile = this.files[0];
-  
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var img = document.getElementById("preview");
-    img.onload = function() {
-      img.style.display = "block";
-      document.querySelector(".drop-icon").style.display  = "none";
-      document.querySelector(".drop-label").style.display = "none";
-      hideBBoxes();
-      document.getElementById("scan-btn").disabled = false;
-      setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
-    };
-    img.onerror = function() { setStatus("Image failed to render.", "error"); };
-    img.src = e.target.result;
-  };
-  reader.onerror = function() { setStatus("FileReader error.", "error"); };
-  reader.readAsDataURL(currentFile);
-});
-    }
-
-    // ── Session state ─────────────────────────────────────────────────
+    // ── State ─────────────────────────────────────────────────────────
     var session = {
       pn: null, palletId: null,
       pnLocked: false, palletLocked: false,
@@ -402,6 +355,41 @@
     var currentFile = null;
     var modalAction = null;
 
+    // ── receiveBase64Image ────────────────────────────────────────────
+    // Called by FileMaker via:
+    // Set Web Viewer [ URL: "javascript:receiveBase64Image('" & $b64 & "')" ]
+    function receiveBase64Image(b64) {
+      setStatus("Image received — loading preview...", "");
+
+      var img = document.getElementById("preview");
+
+      img.onload = function() {
+        img.style.display = "block";
+        document.querySelector(".preview-icon").style.display = "none";
+        document.querySelector(".preview-label").style.display = "none";
+        hideBBoxes();
+        document.getElementById("scan-btn").disabled = false;
+        setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
+
+        // Convert base64 data URL to a File object for Dynamsoft
+        fetch("data:image/jpeg;base64," + b64)
+          .then(function(res) { return res.blob(); })
+          .then(function(blob) {
+            currentFile = new File([blob], "scan.jpg", { type: "image/jpeg" });
+            setStatus("Image ready (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan", "success");
+          })
+          .catch(function(err) {
+            setStatus("Image prep error: " + err.message, "error");
+          });
+      };
+
+      img.onerror = function() {
+        setStatus("Image failed to render.", "error");
+      };
+
+      img.src = "data:image/jpeg;base64," + b64;
+    }
+
     // ── Router init ───────────────────────────────────────────────────
     async function initRouter() {
       if (cvRouter) return true;
@@ -409,9 +397,8 @@
         setSpinnerLabel("Loading scanner engine…");
         setStatus("Loading WASM engine...");
         await Dynamsoft.Core.CoreModule.loadWasm(["DBR"]);
-        setStatus("Creating scanner instance...");
+        setStatus("Creating scanner...");
         cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
-        setStatus("Scanner ready.");
         return true;
       } catch (e) {
         setStatus("Init error: " + (e.message || String(e)), "error");
@@ -422,7 +409,7 @@
 
     // ── Run scan ──────────────────────────────────────────────────────
     async function runScan() {
-      if (!currentFile) { setStatus("No image selected.", "error"); return; }
+      if (!currentFile) { setStatus("No image available.", "error"); return; }
       showSpinner(true);
       setSpinnerLabel("Initializing…");
       setStatus("Starting scan…");
@@ -458,7 +445,7 @@
 
       for (var i = 0; i < sorted.length; i++) {
         var val = sorted[i].text.trim();
-        if (!result.pn && val.includes("-")) {
+        if (!result.pn && val.indexOf("-") !== -1) {
           result.pn = val.substring(0, 5);
           continue;
         }
@@ -555,7 +542,7 @@
       var needPN      = !session.pn;
       var needPallet  = !session.palletId;
 
-      if (needPN && !pnVal)     { setStatus("Please enter a Part Number.", "error"); return; }
+      if (needPN && !pnVal)         { setStatus("Please enter a Part Number.", "error"); return; }
       if (needPallet && !palletVal) { setStatus("Please enter a Pallet ID.", "error"); return; }
 
       if (needPN) {
@@ -580,7 +567,7 @@
         renderBoxList();
         setStatus("Session values set. " + total + " Box ID" + (total > 1 ? "s" : "") + " ready.", "success");
       } else {
-        setStatus("Session values set. Scan a label to capture Box IDs.", "success");
+        setStatus("Session values set. Take a photo to capture Box IDs.", "success");
       }
     }
 
@@ -593,16 +580,16 @@
     }
 
     // ── Add another photo ─────────────────────────────────────────────
+    // Resets the preview — FileMaker's Take Photo button sends the next image
     function addAnotherPhoto() {
       currentFile = null;
       var img = document.getElementById("preview");
       img.style.display = "none"; img.src = "";
-      document.querySelector(".drop-icon").style.display  = "";
-      document.querySelector(".drop-label").style.display = "";
-      document.getElementById("file-input").value  = "";
+      document.querySelector(".preview-icon").style.display  = "";
+      document.querySelector(".preview-label").style.display = "";
       document.getElementById("scan-btn").disabled = true;
       hideBBoxes();
-      setStatus("Ready — tap Photo to add another");
+      setStatus("Ready — use Take Photo button to add another");
       document.getElementById("add-photo-btn").style.display = "none";
     }
 
@@ -740,9 +727,8 @@
       currentFile = null;
       var img = document.getElementById("preview");
       img.style.display = "none"; img.src = "";
-      document.querySelector(".drop-icon").style.display  = "";
-      document.querySelector(".drop-label").style.display = "";
-      document.getElementById("file-input").value  = "";
+      document.querySelector(".preview-icon").style.display  = "";
+      document.querySelector(".preview-label").style.display = "";
       document.getElementById("scan-btn").disabled = true;
       document.getElementById("add-photo-btn").style.display = "none";
       document.getElementById("send-btn").style.display      = "none";
@@ -760,7 +746,7 @@
       document.getElementById("pallet-lock").textContent = "";
       hideManualSection();
       hideBBoxes();
-      setStatus("Session reset — tap Photo to begin");
+      setStatus("Session reset — use Take Photo button to begin");
     }
 
     // ── Modal ─────────────────────────────────────────────────────────
