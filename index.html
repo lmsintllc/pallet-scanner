@@ -364,29 +364,31 @@
     // Using both onchange attribute AND addEventListener for maximum
     // compatibility with FileMaker Go's WebKit
     function setupFileInput() {
-      var fi = document.getElementById("file-input");
-      if (!fi) return;
-
       fi.addEventListener("change", function() {
-        setStatus("Photo received — loading...", "");
-        if (!this.files || !this.files[0]) {
-          setStatus("No file received.", "error");
-          return;
-        }
-        currentFile = this.files[0];
-        var url = URL.createObjectURL(currentFile);
-        var img = document.getElementById("preview");
-        img.onload = function() {
-          img.style.display = "block";
-          document.querySelector(".drop-icon").style.display  = "none";
-          document.querySelector(".drop-label").style.display = "none";
-          hideBBoxes();
-          document.getElementById("scan-btn").disabled = false;
-          setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
-        };
-        img.onerror = function() { setStatus("Image failed to render.", "error"); };
-        img.src = url;
-      });
+  setStatus("Photo received — reading...", "");
+  if (!this.files || !this.files[0]) {
+    setStatus("No file received.", "error");
+    return;
+  }
+  currentFile = this.files[0];
+  
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = document.getElementById("preview");
+    img.onload = function() {
+      img.style.display = "block";
+      document.querySelector(".drop-icon").style.display  = "none";
+      document.querySelector(".drop-label").style.display = "none";
+      hideBBoxes();
+      document.getElementById("scan-btn").disabled = false;
+      setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
+    };
+    img.onerror = function() { setStatus("Image failed to render.", "error"); };
+    img.src = e.target.result;
+  };
+  reader.onerror = function() { setStatus("FileReader error.", "error"); };
+  reader.readAsDataURL(currentFile);
+});
     }
 
     // ── Session state ─────────────────────────────────────────────────
