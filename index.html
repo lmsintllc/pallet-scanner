@@ -286,8 +286,8 @@
         🔍 Scan
       </button>
       <button class="btn btn-secondary" id="add-photo-btn" onclick="triggerFileMakerPhoto()" style="display:none">
-  ➕ Add Photo
-</button>
+        ➕ Add Photo
+      </button>
     </div>
 
     <div id="status">Ready — use the Take Photo button to begin</div>
@@ -589,8 +589,18 @@
       document.querySelector(".preview-label").style.display = "";
       document.getElementById("scan-btn").disabled = true;
       hideBBoxes();
-      setStatus("Ready — use Take Photo button to add another");
+      setStatus("Opening camera...");
       document.getElementById("add-photo-btn").style.display = "none";
+    }
+
+    // Resets preview AND triggers FileMaker camera directly - one tap
+    function triggerFileMakerPhoto() {
+      addAnotherPhoto();
+      if (typeof FileMaker !== "undefined") {
+        FileMaker.PerformScript("Take Photo", "");
+      } else if (typeof fmwebviewjs !== "undefined") {
+        fmwebviewjs.PerformScript("Take Photo", "");
+      }
     }
 
     // ── Render box list ───────────────────────────────────────────────
@@ -793,14 +803,6 @@
         .replace(/&/g,"&amp;").replace(/</g,"&lt;")
         .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
-    function triggerFileMakerPhoto() {
-  addAnotherPhoto(); // reset preview
-  if (typeof FileMaker !== "undefined") {
-    FileMaker.PerformScript("Take Photo", "");
-  } else if (typeof fmwebviewjs !== "undefined") {
-    fmwebviewjs.PerformScript("Take Photo", "");
-  }
-}
   </script>
 </body>
 </html>
