@@ -18,20 +18,49 @@
     .header h1 { font-size: 20px; font-weight: 700; color: #f0f2f8; letter-spacing: -0.3px; }
     .header p  { font-size: 13px; color: #7b8194; margin-top: 4px; }
 
+    /* ── Session bar ── */
     #session-bar {
       width: 100%; max-width: 520px;
       background: #181c28; border: 1px solid #252a3d;
       border-radius: 14px; padding: 14px 16px;
-      margin-bottom: 16px; display: none;
+      margin-bottom: 16px;
     }
-    #session-bar.visible { display: block; }
     .session-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .session-item { flex: 1; min-width: 0; }
-    .session-label { font-size: 10px; font-weight: 700; color: #5a6180; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+    .session-label { font-size: 10px; font-weight: 700; color: #5a6180; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
     .session-value { font-size: 14px; font-weight: 600; color: #e8eaf0; word-break: break-all; }
     .session-divider { width: 1px; height: 36px; background: #252a3d; flex-shrink: 0; }
-    .lock-icon { font-size: 11px; margin-left: 4px; opacity: 0.6; }
+    .lock-icon { font-size: 10px; opacity: 0.5; }
+    .edit-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: #4e6cef; padding: 0;
+      line-height: 1; opacity: 0.8;
+    }
+    .edit-btn:active { opacity: 0.5; }
 
+    /* Inline pallet edit */
+    #pallet-edit-row {
+      margin-top: 10px; display: none;
+      flex-direction: row; gap: 8px; align-items: center;
+    }
+    #pallet-edit-row.visible { display: flex; }
+    #pallet-edit-input {
+      flex: 1; background: #0f1117; border: 1px solid #4e6cef;
+      border-radius: 8px; padding: 8px 12px; color: #e8eaf0;
+      font-size: 14px; font-family: inherit; outline: none;
+    }
+    .btn-save-pallet {
+      padding: 8px 14px; background: #4e6cef; color: #fff;
+      border: none; border-radius: 8px; font-size: 13px;
+      font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    .btn-cancel-pallet {
+      padding: 8px 12px; background: #1e2235; color: #9aa0b8;
+      border: 1px solid #2a2f48; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── Manual pallet entry (when not detected) ── */
     #manual-section {
       width: 100%; max-width: 520px;
       background: #181c28; border: 1px solid #3a2a1a;
@@ -49,13 +78,13 @@
       font-size: 14px; font-family: inherit; outline: none;
     }
     .manual-field input:focus { border-color: #4e6cef; }
-    .manual-field input.locked { opacity: 0.5; background: #0a0c14; cursor: not-allowed; }
     .btn-manual {
       padding: 10px 16px; background: #4e6cef; color: #fff;
       border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
       cursor: pointer; white-space: nowrap; height: 40px; align-self: flex-end;
     }
 
+    /* ── Qty section ── */
     #qty-section {
       width: 100%; max-width: 520px;
       background: #181c28; border: 1px solid #252a3d;
@@ -78,7 +107,7 @@
       font-size: 13px; font-weight: 600; cursor: pointer;
     }
 
-    /* Preview zone — no tap needed, FileMaker sends image directly */
+    /* ── Preview zone ── */
     #preview-zone {
       width: 100%; max-width: 520px; aspect-ratio: 4/3;
       border: 2px dashed #2e3348; border-radius: 16px;
@@ -102,6 +131,7 @@
     #spinner-label { color: #9aa0b8; font-size: 13px; text-align: center; padding: 0 20px; }
     #bbox-canvas { position: absolute; inset: 0; pointer-events: none; display: none; }
 
+    /* ── Buttons ── */
     .btn-row { width: 100%; max-width: 520px; display: flex; gap: 10px; margin-top: 14px; }
     .btn {
       flex: 1; padding: 14px 10px; border: none; border-radius: 12px;
@@ -115,6 +145,7 @@
     .btn-secondary { background: #1e2235; color: #9aa0b8; border: 1px solid #2a2f48; }
     .btn:disabled  { opacity: 0.35; cursor: not-allowed; }
 
+    /* ── Status ── */
     #status {
       margin-top: 14px; font-size: 13px; color: #7b8194;
       min-height: 18px; text-align: center; padding: 0 8px; line-height: 1.5;
@@ -123,6 +154,7 @@
     #status.success { color: #4ecf8e; }
     #status.warning { color: #ef9a4e; }
 
+    /* ── Box list ── */
     #boxlist-section { width: 100%; max-width: 520px; margin-top: 20px; display: none; }
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .section-title { font-size: 13px; font-weight: 700; color: #7b8194; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -154,6 +186,7 @@
     }
     .box-qty-input:focus { border-color: #4e6cef; }
 
+    /* ── Send / Reset ── */
     #send-btn {
       width: 100%; max-width: 520px; margin-top: 16px; padding: 16px;
       border: none; border-radius: 14px;
@@ -162,7 +195,6 @@
       cursor: pointer; display: none; letter-spacing: 0.2px;
     }
     #send-btn:active { transform: scale(0.99); }
-
     #reset-btn {
       width: 100%; max-width: 520px; margin-top: 10px; padding: 13px;
       border: 1px solid #3a2a2a; border-radius: 14px;
@@ -170,6 +202,7 @@
       font-size: 14px; font-weight: 600; cursor: pointer; display: none;
     }
 
+    /* ── Spinner ── */
     .spinner {
       width: 32px; height: 32px;
       border: 3px solid #2a2f48; border-top-color: #4e6cef;
@@ -177,6 +210,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Modal ── */
     #modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7);
       display: none; align-items: center; justify-content: center;
@@ -200,23 +234,33 @@
       background: transparent; color: #9aa0b8; font-size: 14px; font-weight: 600; cursor: pointer;
     }
 
-    #auth-error {
+    /* ── Error screens ── */
+    .fullscreen-error {
       display: none; flex-direction: column; align-items: center;
       justify-content: center; min-height: 60vh; text-align: center; padding: 20px;
     }
-    #auth-error.visible { display: flex; }
-    #auth-error .err-icon { font-size: 48px; margin-bottom: 16px; }
-    #auth-error h2 { font-size: 18px; font-weight: 700; color: #ef5a5a; margin-bottom: 8px; }
-    #auth-error p  { font-size: 14px; color: #5a6180; line-height: 1.6; }
+    .fullscreen-error.visible { display: flex; }
+    .fullscreen-error .err-icon { font-size: 48px; margin-bottom: 16px; }
+    .fullscreen-error h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .fullscreen-error p  { font-size: 14px; color: #5a6180; line-height: 1.6; }
+    #auth-error h2   { color: #ef5a5a; }
+    #config-error h2 { color: #ef9a4e; }
   </style>
 </head>
 <body>
 
-  <!-- Auth error -->
-  <div id="auth-error">
+  <!-- Auth error: no key -->
+  <div id="auth-error" class="fullscreen-error">
     <div class="err-icon">🔒</div>
     <h2>Access Denied</h2>
     <p>This scanner must be opened from within FileMaker.<br>Direct access is not permitted.</p>
+  </div>
+
+  <!-- Config error: no PN -->
+  <div id="config-error" class="fullscreen-error">
+    <div class="err-icon">⚙️</div>
+    <h2>Configuration Error</h2>
+    <p>No Part Number was provided.<br>Please open this scanner from a valid FileMaker record.</p>
   </div>
 
   <!-- Main app -->
@@ -224,43 +268,63 @@
 
     <div class="header">
       <h1>Pallet Scanner</h1>
-      <p>Tap Take Photo to scan a pallet label</p>
+      <p>Scan pallet labels to capture Box IDs</p>
     </div>
 
+    <!-- Session bar — always visible -->
     <div id="session-bar">
       <div class="session-row">
+
+        <!-- Part Number — locked, from URL -->
         <div class="session-item">
-          <div class="session-label">Part Number <span id="pn-lock" class="lock-icon"></span></div>
+          <div class="session-label">
+            Part Number <span class="lock-icon">🔒</span>
+          </div>
           <div class="session-value" id="session-pn">—</div>
         </div>
+
         <div class="session-divider"></div>
+
+        <!-- Pallet ID — editable -->
         <div class="session-item">
-          <div class="session-label">Pallet ID <span id="pallet-lock" class="lock-icon"></span></div>
+          <div class="session-label">
+            Pallet ID
+            <button class="edit-btn" onclick="startPalletEdit()" id="pallet-edit-btn" title="Edit Pallet ID">✏️</button>
+          </div>
           <div class="session-value" id="session-pallet">—</div>
         </div>
+
         <div class="session-divider"></div>
+
+        <!-- Box count -->
         <div class="session-item">
           <div class="session-label">Boxes</div>
           <div class="session-value" id="session-count">0</div>
         </div>
+
+      </div>
+
+      <!-- Inline pallet edit row -->
+      <div id="pallet-edit-row">
+        <input type="text" id="pallet-edit-input" placeholder="Enter Pallet ID" />
+        <button class="btn-save-pallet" onclick="savePalletEdit()">Save</button>
+        <button class="btn-cancel-pallet" onclick="cancelPalletEdit()">Cancel</button>
       </div>
     </div>
 
+    <!-- Manual pallet entry (shown when not detected from scan) -->
     <div id="manual-section">
-      <div class="manual-title">⚠ Missing from scan — enter manually</div>
+      <div class="manual-title">⚠ Pallet ID not detected — enter manually</div>
       <div class="manual-row">
-        <div class="manual-field" id="manual-pn-wrap">
-          <label>Part Number (first 5 chars)</label>
-          <input type="text" id="manual-pn" placeholder="e.g. 25093" maxlength="10" />
-        </div>
-        <div class="manual-field" id="manual-pallet-wrap">
+        <div class="manual-field">
           <label>Pallet ID</label>
           <input type="text" id="manual-pallet" placeholder="e.g. 2624083" />
         </div>
-        <button class="btn-manual" onclick="applyManualEntry()">Apply</button>
+        <button class="btn-manual" onclick="applyManualPallet()">Apply</button>
       </div>
     </div>
 
+    <!-- Default quantity -->
     <div id="qty-section">
       <div class="qty-row">
         <span class="qty-label">Default quantity per Box ID</span>
@@ -269,7 +333,7 @@
       </div>
     </div>
 
-    <!-- Preview zone — image injected by FileMaker via receiveBase64Image() -->
+    <!-- Preview zone -->
     <div id="preview-zone">
       <span class="preview-icon">📷</span>
       <span class="preview-label">Tap Take Photo to photograph a pallet label</span>
@@ -292,6 +356,7 @@
 
     <div id="status">Ready — tap Take Photo to begin</div>
 
+    <!-- Box ID list -->
     <div id="boxlist-section">
       <div class="section-header">
         <span class="section-title">Box ID List</span>
@@ -305,6 +370,7 @@
 
   </div>
 
+  <!-- Modal -->
   <div id="modal-overlay">
     <div class="modal">
       <div class="modal-title" id="modal-title">Notice</div>
@@ -317,18 +383,25 @@
   </div>
 
   <script>
-    // ── AUTH ──────────────────────────────────────────────────────────
+    // ── URL PARAMS ────────────────────────────────────────────────────
     var params      = new URLSearchParams(window.location.search);
     var LICENSE_KEY = params.get("key") || "";
+    var urlData     = {};
+    try { urlData = JSON.parse(params.get("data") || "{}"); } catch(e) {}
+    var SESSION_PN  = (urlData.pn || "").trim().substring(0, 5).toUpperCase();
 
+    // ── BOOT ──────────────────────────────────────────────────────────
     if (!LICENSE_KEY) {
       document.getElementById("auth-error").classList.add("visible");
+    } else if (!SESSION_PN) {
+      document.getElementById("config-error").classList.add("visible");
     } else {
       var appEl = document.getElementById("app");
       appEl.style.display       = "flex";
       appEl.style.flexDirection = "column";
       appEl.style.alignItems    = "center";
       appEl.style.width         = "100%";
+      document.getElementById("session-pn").textContent = SESSION_PN;
       initDynamsoft();
     }
 
@@ -344,51 +417,17 @@
       };
     }
 
-    // ── State ─────────────────────────────────────────────────────────
+    // ── Session state ─────────────────────────────────────────────────
     var session = {
-      pn: null, palletId: null,
-      pnLocked: false, palletLocked: false,
-      boxIds: {}, photoCount: 0
+      palletId:     null,
+      palletLocked: false,
+      boxIds:       {},
+      photoCount:   0
     };
 
     var cvRouter    = null;
     var currentFile = null;
     var modalAction = null;
-
-    // ── receiveBase64Image ────────────────────────────────────────────
-    // Called by FileMaker via:
-    // Set Web Viewer [ URL: "javascript:receiveBase64Image('" & $b64 & "')" ]
-    function receiveBase64Image(b64) {
-      setStatus("Image received — loading preview...", "");
-
-      var img = document.getElementById("preview");
-
-      img.onload = function() {
-        img.style.display = "block";
-        document.querySelector(".preview-icon").style.display = "none";
-        document.querySelector(".preview-label").style.display = "none";
-        hideBBoxes();
-        document.getElementById("scan-btn").disabled = false;
-        setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
-
-        // Convert base64 data URL to a File object for Dynamsoft
-        fetch("data:image/jpeg;base64," + b64)
-          .then(function(res) { return res.blob(); })
-          .then(function(blob) {
-            currentFile = new File([blob], "scan.jpg", { type: "image/jpeg" });
-            setStatus("Image ready (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan", "success");
-          })
-          .catch(function(err) {
-            setStatus("Image prep error: " + err.message, "error");
-          });
-      };
-
-      img.onerror = function() {
-        setStatus("Image failed to render.", "error");
-      };
-
-      img.src = "data:image/jpeg;base64," + b64;
-    }
 
     // ── Router init ───────────────────────────────────────────────────
     async function initRouter() {
@@ -400,11 +439,38 @@
         setStatus("Creating scanner...");
         cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
         return true;
-      } catch (e) {
+      } catch(e) {
         setStatus("Init error: " + (e.message || String(e)), "error");
         cvRouter = null;
         return false;
       }
+    }
+
+    // ── receiveBase64Image — called by FileMaker ──────────────────────
+    function receiveBase64Image(b64) {
+      setStatus("Image received — loading preview...", "");
+      var img = document.getElementById("preview");
+
+      img.onload = function() {
+        img.style.display = "block";
+        document.querySelector(".preview-icon").style.display = "none";
+        document.querySelector(".preview-label").style.display = "none";
+        hideBBoxes();
+        document.getElementById("scan-btn").disabled = false;
+        setStatus("Image loaded (" + img.naturalWidth + "x" + img.naturalHeight + ") — tap Scan");
+
+        fetch("data:image/jpeg;base64," + b64)
+          .then(function(res) { return res.blob(); })
+          .then(function(blob) {
+            currentFile = new File([blob], "scan.jpg", { type: "image/jpeg" });
+            setStatus("Image ready — tap Scan", "success");
+          })
+          .catch(function(err) {
+            setStatus("Image prep error: " + err.message, "error");
+          });
+      };
+      img.onerror = function() { setStatus("Image failed to render.", "error"); };
+      img.src = "data:image/jpeg;base64," + b64;
     }
 
     // ── Run scan ──────────────────────────────────────────────────────
@@ -430,7 +496,7 @@
         }
         drawBoundingBoxes(items);
         processResults(items);
-      } catch (e) {
+      } catch(e) {
         setStatus("Scan error: " + (e.message || String(e)), "error");
       } finally {
         showSpinner(false);
@@ -439,69 +505,80 @@
     }
 
     // ── Classify barcodes ─────────────────────────────────────────────
+    // PN comes from URL — no longer detected from barcodes
+    // Pallet ID: short numeric-only value <= 10 chars
+    // Box IDs:   long numeric strings >= 10 digits whose first 5 chars match SESSION_PN
     function classifyBarcodes(items) {
-      var result = { pn: null, palletId: null, boxIds: [] };
+      var result = { palletId: null, boxIds: [], invalidBoxIds: [] };
       var sorted = items.slice().sort(function(a, b) { return a.text.length - b.text.length; });
 
       for (var i = 0; i < sorted.length; i++) {
         var val = sorted[i].text.trim();
-        if (!result.pn && val.indexOf("-") !== -1) {
-          result.pn = val.substring(0, 5);
-          continue;
-        }
+
+        // Pallet ID: short numeric only
         if (!result.palletId && /^\d+$/.test(val) && val.length <= 10) {
           result.palletId = val;
           continue;
         }
+
+        // Long numeric — could be a Box ID
         if (/^\d{10,}$/.test(val)) {
-          result.boxIds.push(val);
+          var prefix = val.substring(0, 5).toUpperCase();
+          if (prefix === SESSION_PN) {
+            result.boxIds.push(val);
+          } else {
+            result.invalidBoxIds.push(val);
+          }
         }
       }
       return result;
     }
 
-    // ── Process results ───────────────────────────────────────────────
+    // ── Process scan results ──────────────────────────────────────────
     function processResults(items) {
       var classified = classifyBarcodes(items);
       var defaultQty = parseInt(document.getElementById("default-qty").value) || 1;
-      var newBoxCount = 0;
-      var blocked = false;
 
-      if (classified.pn) {
-        if (!session.pn) {
-          session.pn = classified.pn;
-        } else if (!session.pnLocked && classified.pn !== session.pn) {
-          showModal("Part Number Mismatch",
-            "This photo contains Part Number <strong>" + classified.pn + "</strong> but the current session has <strong>" + session.pn + "</strong>.<br><br>Photo rejected. Reset the session to start over.");
-          blocked = true;
-        }
+      // ── Reject if any Box IDs don't match PN ──
+      if (classified.invalidBoxIds.length > 0) {
+        resetPreview();
+        showModal(
+          "Part Number Mismatch",
+          "This photo contains Box IDs that do not match Part Number <strong>" + SESSION_PN + "</strong>:<br><br>" +
+          "<strong>" + classified.invalidBoxIds.join("<br>") + "</strong><br><br>" +
+          "The entire photo has been rejected. Please retake the photo."
+        );
+        return;
       }
 
-      if (!blocked && classified.palletId) {
+      // ── Reject if no valid Box IDs found ──
+      if (classified.boxIds.length === 0) {
+        resetPreview();
+        showModal(
+          "No Valid Box IDs Found",
+          "No Box IDs matching Part Number <strong>" + SESSION_PN + "</strong> were detected in this photo.<br><br>" +
+          "Please retake the photo or try a clearer image."
+        );
+        return;
+      }
+
+      // ── Validate / set Pallet ID ──
+      if (classified.palletId) {
         if (!session.palletId) {
           session.palletId = classified.palletId;
-        } else if (!session.palletLocked && classified.palletId !== session.palletId) {
-          showModal("Pallet ID Mismatch",
-            "This photo contains Pallet ID <strong>" + classified.palletId + "</strong> but the current session has <strong>" + session.palletId + "</strong>.<br><br>Photo rejected. Reset the session to start over.");
-          blocked = true;
+        } else if (classified.palletId !== session.palletId) {
+          resetPreview();
+          showModal(
+            "Pallet ID Mismatch",
+            "This photo contains Pallet ID <strong>" + classified.palletId + "</strong> but the current session has <strong>" + session.palletId + "</strong>.<br><br>" +
+            "Photo rejected. If this is a different pallet, reset the session first."
+          );
+          return;
         }
       }
 
-      if (blocked) return;
-
-      var hasPN     = !!session.pn;
-      var hasPallet = !!session.palletId;
-
-      if (!hasPN || !hasPallet) {
-        showManualSection(!hasPN, !hasPallet);
-        setStatus(
-          "⚠ " + (!hasPN ? "Part Number" : "") +
-          (!hasPN && !hasPallet ? " and " : "") +
-          (!hasPallet ? "Pallet ID" : "") +
-          " not detected — enter manually to continue.", "warning"
-        );
-      }
-
+      // ── Add Box IDs (skip duplicates) ──
+      var newBoxCount = 0;
       for (var j = 0; j < classified.boxIds.length; j++) {
         var boxId = classified.boxIds[j];
         if (!session.boxIds[boxId]) {
@@ -514,7 +591,11 @@
       updateSessionBar();
       renderBoxList();
 
-      if (hasPN && hasPallet) {
+      // ── Show manual pallet entry if not detected ──
+      if (!session.palletId) {
+        showManualSection();
+        setStatus("⚠ Pallet ID not detected — enter manually to continue.", "warning");
+      } else {
         hideManualSection();
         var total = Object.keys(session.boxIds).length;
         if (newBoxCount > 0) {
@@ -522,39 +603,22 @@
         } else {
           setStatus("No new Box IDs found. " + total + " total.", "warning");
         }
-      }
-
-
-      if (hasPN && hasPallet && Object.keys(session.boxIds).length > 0) {
-        document.getElementById("send-btn").style.display  = "block";
-        document.getElementById("reset-btn").style.display = "block";
-        document.getElementById("qty-section").classList.add("visible");
+        if (total > 0) {
+          document.getElementById("send-btn").style.display  = "block";
+          document.getElementById("reset-btn").style.display = "block";
+          document.getElementById("qty-section").classList.add("visible");
+        }
       }
     }
 
-    // ── Manual entry ──────────────────────────────────────────────────
-    function applyManualEntry() {
-      var pnInput     = document.getElementById("manual-pn");
-      var palletInput = document.getElementById("manual-pallet");
-      var pnVal       = pnInput.value.trim().substring(0, 5);
-      var palletVal   = palletInput.value.trim();
-      var needPN      = !session.pn;
-      var needPallet  = !session.palletId;
+    // ── Manual pallet entry ───────────────────────────────────────────
+    function applyManualPallet() {
+      var input    = document.getElementById("manual-pallet");
+      var palletVal = input.value.trim();
 
-      if (needPN && !pnVal)         { setStatus("Please enter a Part Number.", "error"); return; }
-      if (needPallet && !palletVal) { setStatus("Please enter a Pallet ID.", "error"); return; }
+      if (!palletVal) { setStatus("Please enter a Pallet ID.", "error"); return; }
 
-      if (needPN) {
-        session.pn = pnVal; session.pnLocked = true;
-        pnInput.classList.add("locked"); pnInput.disabled = true;
-        document.getElementById("pn-lock").textContent = "🔒";
-      }
-      if (needPallet) {
-        session.palletId = palletVal; session.palletLocked = true;
-        palletInput.classList.add("locked"); palletInput.disabled = true;
-        document.getElementById("pallet-lock").textContent = "🔒";
-      }
-
+      session.palletId = palletVal;
       hideManualSection();
       updateSessionBar();
 
@@ -563,11 +627,34 @@
         document.getElementById("send-btn").style.display  = "block";
         document.getElementById("reset-btn").style.display = "block";
         document.getElementById("qty-section").classList.add("visible");
-        renderBoxList();
-        setStatus("Session values set. " + total + " Box ID" + (total > 1 ? "s" : "") + " ready.", "success");
+        setStatus("Pallet ID set. " + total + " Box ID" + (total > 1 ? "s" : "") + " ready.", "success");
       } else {
-        setStatus("Session values set. Take a photo to capture Box IDs.", "success");
+        setStatus("Pallet ID set. Scan a label to capture Box IDs.", "success");
       }
+    }
+
+    // ── Pallet ID inline edit ─────────────────────────────────────────
+    function startPalletEdit() {
+      var input = document.getElementById("pallet-edit-input");
+      input.value = session.palletId || "";
+      document.getElementById("pallet-edit-row").classList.add("visible");
+      input.focus();
+    }
+
+    function savePalletEdit() {
+      var input     = document.getElementById("pallet-edit-input");
+      var palletVal = input.value.trim();
+
+      if (!palletVal) { setStatus("Pallet ID cannot be empty.", "error"); return; }
+
+      session.palletId = palletVal;
+      document.getElementById("pallet-edit-row").classList.remove("visible");
+      updateSessionBar();
+      setStatus("Pallet ID updated.", "success");
+    }
+
+    function cancelPalletEdit() {
+      document.getElementById("pallet-edit-row").classList.remove("visible");
     }
 
     // ── Default qty ───────────────────────────────────────────────────
@@ -578,22 +665,8 @@
       setStatus("Default quantity " + qty + " applied to all boxes.", "success");
     }
 
-    // ── Add another photo ─────────────────────────────────────────────
-    // Resets the preview — FileMaker's Take Photo button sends the next image
-    function addAnotherPhoto() {
-      currentFile = null;
-      var img = document.getElementById("preview");
-      img.style.display = "none"; img.src = "";
-      document.querySelector(".preview-icon").style.display  = "";
-      document.querySelector(".preview-label").style.display = "";
-      document.getElementById("scan-btn").disabled = true;
-      hideBBoxes();
-      setStatus("Opening camera...");
-    }
-
-    // Resets preview and triggers FileMaker camera - works for first photo and retakes
+    // ── Take Photo / retake ───────────────────────────────────────────
     function triggerFileMakerPhoto() {
-      // Reset preview state
       currentFile = null;
       var img = document.getElementById("preview");
       img.style.display = "none"; img.src = "";
@@ -602,12 +675,22 @@
       document.getElementById("scan-btn").disabled = true;
       hideBBoxes();
       setStatus("Opening camera...");
-      // Fire FileMaker native camera
       if (typeof FileMaker !== "undefined") {
         FileMaker.PerformScript("Take Photo", "");
       } else if (typeof fmwebviewjs !== "undefined") {
         fmwebviewjs.PerformScript("Take Photo", "");
       }
+    }
+
+    // ── Reset preview (used after photo rejection) ────────────────────
+    function resetPreview() {
+      currentFile = null;
+      var img = document.getElementById("preview");
+      img.style.display = "none"; img.src = "";
+      document.querySelector(".preview-icon").style.display  = "";
+      document.querySelector(".preview-label").style.display = "";
+      document.getElementById("scan-btn").disabled = true;
+      hideBBoxes();
     }
 
     // ── Render box list ───────────────────────────────────────────────
@@ -649,19 +732,16 @@
 
     // ── Session bar ───────────────────────────────────────────────────
     function updateSessionBar() {
-      document.getElementById("session-pn").textContent     = session.pn       || "—";
       document.getElementById("session-pallet").textContent = session.palletId || "—";
       document.getElementById("session-count").textContent  = Object.keys(session.boxIds).length;
-      document.getElementById("session-bar").classList.add("visible");
     }
 
-    function showManualSection(showPN, showPallet) {
+    function showManualSection() {
       document.getElementById("manual-section").classList.add("visible");
-      document.getElementById("manual-pn-wrap").style.display     = showPN     ? "" : "none";
-      document.getElementById("manual-pallet-wrap").style.display = showPallet ? "" : "none";
     }
     function hideManualSection() {
       document.getElementById("manual-section").classList.remove("visible");
+      document.getElementById("manual-pallet").value = "";
     }
 
     // ── Bounding boxes ────────────────────────────────────────────────
@@ -704,8 +784,8 @@
 
     // ── Send to FileMaker ─────────────────────────────────────────────
     function sendToFileMaker() {
-      if (!session.pn || !session.palletId) {
-        setStatus("Part Number and Pallet ID required before sending.", "error"); return;
+      if (!session.palletId) {
+        setStatus("Pallet ID required before sending.", "error"); return;
       }
       if (!Object.keys(session.boxIds).length) {
         setStatus("No Box IDs to send.", "error"); return;
@@ -714,7 +794,7 @@
         return { index: i + 1, boxId: entry[0], qty: entry[1].qty };
       });
       var payload = {
-        partNumber: session.pn,
+        partNumber: SESSION_PN,
         palletId:   session.palletId,
         totalBoxes: boxes.length,
         totalQty:   boxes.reduce(function(sum, b) { return sum + b.qty; }, 0),
@@ -729,40 +809,39 @@
       } else {
         setStatus("FileMaker bridge not available.", "error"); return;
       }
-      setStatus("Sent to FileMaker — " + boxes.length + " boxes.", "success");
+
+      // Reset for next pallet — keep PN loaded
+      session = { palletId: null, palletLocked: false, boxIds: {}, photoCount: 0 };
+      resetPreview();
+      updateSessionBar();
+      document.getElementById("box-list").innerHTML = "";
+      document.getElementById("boxlist-section").style.display = "none";
+      document.getElementById("send-btn").style.display        = "none";
+      document.getElementById("reset-btn").style.display       = "none";
+      document.getElementById("qty-section").classList.remove("visible");
+      hideManualSection();
+      setStatus("Sent! Ready to scan next pallet.", "success");
     }
 
-    // ── Reset ─────────────────────────────────────────────────────────
+    // ── Reset session ─────────────────────────────────────────────────
     function confirmReset() {
       showModal("Reset Session?",
-        "This will clear all scanned Box IDs, Part Number, and Pallet ID. This cannot be undone.",
+        "This will clear all scanned Box IDs and the Pallet ID. Part Number will remain. This cannot be undone.",
         "reset");
     }
 
     function doReset() {
-      session = { pn: null, palletId: null, pnLocked: false, palletLocked: false, boxIds: {}, photoCount: 0 };
-      currentFile = null;
-      var img = document.getElementById("preview");
-      img.style.display = "none"; img.src = "";
-      document.querySelector(".preview-icon").style.display  = "";
-      document.querySelector(".preview-label").style.display = "";
-      document.getElementById("scan-btn").disabled = true;
-      document.getElementById("send-btn").style.display      = "none";
-      document.getElementById("reset-btn").style.display     = "none";
+      session = { palletId: null, palletLocked: false, boxIds: {}, photoCount: 0 };
+      resetPreview();
+      updateSessionBar();
       document.getElementById("box-list").innerHTML = "";
       document.getElementById("boxlist-section").style.display = "none";
-      document.getElementById("session-bar").classList.remove("visible");
+      document.getElementById("send-btn").style.display        = "none";
+      document.getElementById("reset-btn").style.display       = "none";
       document.getElementById("qty-section").classList.remove("visible");
-      var pnInput     = document.getElementById("manual-pn");
-      var palletInput = document.getElementById("manual-pallet");
-      pnInput.value = ""; palletInput.value = "";
-      pnInput.disabled = false; palletInput.disabled = false;
-      pnInput.classList.remove("locked"); palletInput.classList.remove("locked");
-      document.getElementById("pn-lock").textContent     = "";
-      document.getElementById("pallet-lock").textContent = "";
+      document.getElementById("pallet-edit-row").classList.remove("visible");
       hideManualSection();
-      hideBBoxes();
-      setStatus("Session reset — use Take Photo button to begin");
+      setStatus("Session reset — tap Take Photo to begin");
     }
 
     // ── Modal ─────────────────────────────────────────────────────────
